@@ -32,14 +32,13 @@
             user-select: text;
         }
 
-        /* 【響應式升級】：鎖定螢幕不允許滾動，自適應動態高度 */
         body {
             background-color: #f7f6f2;
             color: #333;
             width: 100vw;
             height: 100vh;
-            height: 100dvh; /* 支援現代手機動態視窗高度 */
-            overflow: hidden; /* 隱藏全局滾動條 */
+            height: 100dvh;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -67,11 +66,12 @@
             background-color: #4A4A4A;
             color: #fff;
             border: none;
-            padding: 1.5vh 6vw; /* 動態按鈕大小 */
+            padding: 1.5vh 6vw;
             font-size: clamp(1rem, 2vh, 1.15rem);
             border-radius: 30px;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
+            /* 加入 opacity 漸變，讓按鈕消失時也能平順過渡 */
+            transition: background-color 0.3s, transform 0.2s, opacity 0.5s ease;
             margin: 1.5vh 0;
             letter-spacing: 2px;
         }
@@ -80,11 +80,17 @@
             transform: scale(1.05);
         }
 
+        /* 完全移除元素的 class */
         .hidden {
             display: none !important;
         }
 
-        /* 頁面容器共通設定 */
+        /* 【防跳動核心】：保留實體排版空間，但光學隱形 */
+        .hide-opacity {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
         #page-1, #page-board {
             width: 100%;
             display: flex;
@@ -93,7 +99,6 @@
             justify-content: center;
         }
 
-        /* 【響應式升級】：Logo 與文字自動縮放 */
         .logo-container {
             width: min(45vw, 25vh);
             height: min(45vw, 25vh);
@@ -118,13 +123,11 @@
             text-align: center;
         }
         
-        /* 【響應式升級】：九宮格完美適應螢幕 */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 2vmin;
             width: 100%;
-            /* 寬度不超過螢幕的85%，且高度保證不超過螢幕的45%，確保絕不破版 */
             max-width: min(85vw, 45vh); 
             margin: 0 auto;
         }
@@ -201,21 +204,19 @@
             transform: rotateY(180deg) scale(1.03);
         }
 
-        /* 【視覺動線平衡】：夾在九宮格與按鈕中間的熵值簽名 */
         .entropy-signature {
-            margin: 2.5vh 0; /* 上下左右等距呼吸空間 */
+            margin: 2.5vh 0; 
             font-size: clamp(0.6rem, 1.5vh, 0.75rem);
             color: #b0b0b0;
             letter-spacing: 1.5px;
             font-family: 'Courier New', Courier, monospace;
-            opacity: 0.6;
+            opacity: 0.6; /* 最終顯示的透明度 */
             word-break: break-all;
             max-width: 90%;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.8s ease;
             text-align: center;
         }
 
-        /* Modal 彈出視窗：保持內部可滾動 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -246,7 +247,7 @@
             transform: translateY(20px);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: left;
-            max-height: 85vh; /* 限制高度讓視窗內可以滑動 */
+            max-height: 85vh;
             overflow-y: auto;
         }
         .modal-overlay.active .modal-content {
@@ -302,10 +303,9 @@
         <div id="page-board" class="hidden">
             <div class="grid-container" id="card-grid"></div>
             
+            <p id="entropy-signature" class="entropy-signature hide-opacity"></p>
+            
             <button id="btn-flip">翻牌</button>
-            
-            <p id="entropy-signature" class="entropy-signature hidden"></p>
-            
             <button id="btn-reset" class="hidden">重新抽牌</button>
         </div>
     </div>
@@ -407,11 +407,15 @@
             function startGame() {
                 page1.classList.add('hidden');
                 pageBoard.classList.remove('hidden');
-                btnFlip.classList.remove('hidden');
+                
+                // 恢復翻牌按鈕，確保它可見可點擊
+                btnFlip.classList.remove('hidden', 'hide-opacity');
+                btnFlip.style.pointerEvents = 'auto';
                 btnReset.classList.add('hidden');
                 
+                // 注入內容，並套用光學隱藏以「卡位」撐開空間
                 entropySignatureEl.textContent = generateEntropySignature();
-                entropySignatureEl.classList.add('hidden');
+                entropySignatureEl.classList.add('hide-opacity');
                 
                 shuffledDeck = shuffleArray(cardData);
                 renderGrid();
@@ -461,8 +465,11 @@
             }
 
             function flipAllCards() {
+                if(isFlipping) return;
                 isFlipping = true;
-                btnFlip.classList.add('hidden'); 
+                
+                // 【防跳動核心】：不拔掉元素，而是讓翻牌按鈕光學隱形並失效，版面100%固定
+                btnFlip.classList.add('hide-opacity');
                 
                 const allCardInners = document.querySelectorAll('.card-inner');
                 const allCardSlots = document.querySelectorAll('.card-slot');
@@ -475,8 +482,13 @@
                             setTimeout(() => {
                                 isFlipping = false;
                                 allCardSlots.forEach(slot => slot.classList.add('clickable'));
-                                entropySignatureEl.classList.remove('hidden'); // 先顯示簽名
-                                btnReset.classList.remove('hidden'); // 再顯示按鈕，達成視覺動線
+                                
+                                // 【無縫交接】：翻牌按鈕退場，重新抽牌按鈕進場
+                                btnFlip.classList.add('hidden');
+                                btnReset.classList.remove('hidden');
+                                
+                                // 揭曉宇宙簽名
+                                entropySignatureEl.classList.remove('hide-opacity');
                             }, 500);
                         }
                     }, index * 200);
@@ -521,7 +533,7 @@
                 shuffledDeck = [];
                 isFlipping = false;
                 
-                entropySignatureEl.classList.add('hidden');
+                entropySignatureEl.classList.add('hide-opacity');
                 entropySignatureEl.textContent = '';
                 
                 pageBoard.classList.add('hidden');
