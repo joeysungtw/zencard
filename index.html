@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>八色禪卡線上抽牌</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Google Sans', 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f7f6f2;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        button {
+            background-color: #4A4A4A;
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 30px;
+            letter-spacing: 2px;
+        }
+        button:hover {
+            background-color: #2c2c2c;
+            transform: scale(1.05);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #page-1 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .logo-container {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            animation: spin 15s linear infinite;
+            background-color: transparent; 
+        }
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+        .instruction {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        #page-board {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .pos-3 { grid-column: 1; grid-row: 1; } 
+        .pos-4 { grid-column: 2; grid-row: 1; } 
+        .pos-5 { grid-column: 3; grid-row: 1; } 
+        .pos-2 { grid-column: 1; grid-row: 2; } 
+        
+        .pos-empty { 
+            grid-column: 2; 
+            grid-row: 2; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        } 
+        .center-logo {
+            width: 75%;
+            height: 75%;
+            object-fit: contain;
+            animation: spin 20s linear infinite; 
+            opacity: 0.85;
+        }
+
+        .pos-6 { grid-column: 3; grid-row: 2; } 
+        .pos-1 { grid-column: 1; grid-row: 3; } 
+        .pos-8 { grid-column: 2; grid-row: 3; } 
+        .pos-7 { grid-column: 3; grid-row: 3; } 
+
+        .card-slot {
+            aspect-ratio: 2 / 3; 
+            perspective: 1000px;
+            width: 100%;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+            border-radius: 14px;
+        }
+        .card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 14px; 
+            overflow: hidden;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: transparent; 
+        }
+        .card-back {
+            background-image: url('./images/card-back.png');
+        }
+        .card-front {
+            transform: rotateY(180deg);
+        }
+        
+        .card-slot.clickable .card-inner {
+            cursor: pointer;
+        }
+        .card-slot.clickable .card-inner:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            transform: rotateY(180deg) scale(1.03);
+        }
+
+        /* ================= Modal 彈出視窗 ================= */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: #fff;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: left;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 1.8rem;
+            color: #999;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+        .close-btn:hover {
+            color: #333;
+        }
+        .modal-image {
+            width: 100%;
+            height: 280px;
+            object-fit: contain;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            background-color: transparent;
+        }
+        .modal-title {
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+            color: #222;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 8px;
+            font-weight: 700;
+        }
+        .modal-desc {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #444;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="page-1">
+            <div class="logo-container">
+                <img src="./images/logo.png" alt="Logo" class="logo" onerror="this.style.display='none'">
+            </div>
+            <p class="instruction">請集中注意力，心中默念想要詢問的問題三次，<br>接著點擊下方開始擺牌</p>
+            <button id="btn-start">開始擺牌</button>
+        </div>
+
+        <div id="page-board" class="hidden">
+            <div class="grid-container" id="card-grid">
+                </div>
+            
+            <button id="btn-flip">翻牌</button>
+            <button id="btn-reset" class="hidden">再次抽牌</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content" id="modal-content-box">
+            <span class="close-btn" id="btn-close-modal">&times;</span>
+            <div class="modal-image" id="modal-img-placeholder"></div>
+            <h2 class="modal-title" id="modal-title"></h2>
+            <div class="modal-desc" id="modal-desc"></div>
+        </div>
+    </div>
+
+    <script>
+        // 【防禦性殼層】：確保 HTML 完全載入後才執行 JS，杜絕按鈕失效問題
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const cardData = [
+                { id: 'red', color: '紅色', img: './images/card-front-red.png',
+                  meaning: `對應海底輪。
+光明面：熱情、勤勞、活力。
+陰影面：好勝、急躁、衝動。
+行運吉凶：充滿行動力、執行力；或有口舌爭執、衝動行事、身忙心亂。` },
+                { id: 'orange', color: '橙色', img: './images/card-front-orange.png',
+                  meaning: `對應臍輪。
+光明面：謹慎、準備充分。
+陰影面：悲觀、恐懼、情緒化。
+行運吉凶：糾葛難安、陰祟困擾、瑣事多。運勢能量「低落No.1」。` },
+                { id: 'yellow', color: '黃色', img: './images/card-front-yellow.png',
+                  meaning: `對應太陽神經叢。
+光明面：聰明、理性、完美。
+陰影面：固執、嚴肅、緊張。
+行運吉凶：快樂、旅行、偏財、轉運。` },
+                { id: 'green', color: '綠色', img: './images/card-front-green.png',
+                  meaning: `對應心輪。
+光明面：親和、好奇、溝通。
+陰影面：善變、多話、輕浮。
+行運吉凶：喜慶、事業成功，考試順利、正財。` },
+                { id: 'pink', color: '粉紅色', img: './images/card-front-pink.png',
+                  meaning: `對應上心輪。
+光明面：戀愛、重情、樂觀。
+陰影面：濫好人、不知拒絕。
+行運吉凶：愛情順、紅鸞星動、心情美麗、人緣桃花帶來財運。` },
+                { id: 'blue', color: '藍色', img: './images/card-front-blue.png',
+                  meaning: `對應喉輪。
+光明面：心思細密、文藝氣息。
+陰影面：敏感憂鬱、多愁善感。
+行運吉凶：煩惱不順、濁病氣纏身、犯小人。運勢能量低落「No.2」。` },
+                { id: 'purple', color: '紫色', img: './images/card-front-purple.png',
+                  meaning: `對應眉心輪。
+光明面：正派、覺知力強、理想性。
+陰影面：拘謹、內向、太過心軟。
+行運吉凶：貴人、諸事吉利、靈性。` },
+                { id: 'white', color: '白色', img: './images/card-front-white.png',
+                  meaning: `對應頂輪。
+光明面：悠閒自得。
+陰影面：茫然無助、沒主見、沒目標。
+行運吉凶：恍神多意外、生命能量虛弱。運勢能量低落「No.3」。` }
+            ];
+
+            const gridPositions = ['pos-1', 'pos-2', 'pos-3', 'pos-4', 'pos-5', 'pos-6', 'pos-7', 'pos-8'];
+            let shuffledDeck = [];
+            let isFlipping = false;
+
+            const page1 = document.getElementById('page-1');
+            const pageBoard = document.getElementById('page-board');
+            const gridContainer = document.getElementById('card-grid');
+            
+            const btnStart = document.getElementById('btn-start');
+            const btnFlip = document.getElementById('btn-flip');
+            const btnReset = document.getElementById('btn-reset');
+            
+            const modal = document.getElementById('modal');
+            const btnCloseModal = document.getElementById('btn-close-modal');
+            const modalImgPlaceholder = document.getElementById('modal-img-placeholder');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDesc = document.getElementById('modal-desc');
+
+            // 綁定事件監聽器
+            if(btnStart) btnStart.addEventListener('click', startGame);
+            if(btnFlip) btnFlip.addEventListener('click', flipAllCards);
+            if(btnReset) btnReset.addEventListener('click', resetGame);
+            if(btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
+            
+            if(modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) closeModal();
+                });
+            }
+
+            function shuffleArray(array) {
+                const arr = [...array];
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            function startGame() {
+                page1.classList.add('hidden');
+                pageBoard.classList.remove('hidden');
+                btnFlip.classList.remove('hidden');
+                btnReset.classList.add('hidden');
+                
+                shuffledDeck = shuffleArray(cardData);
+                renderGrid();
+            }
+
+            function renderGrid() {
+                gridContainer.innerHTML = ''; 
+                
+                const emptySlot = document.createElement('div');
+                emptySlot.className = 'pos-empty';
+                const centerLogoImg = document.createElement('img');
+                centerLogoImg.src = './images/logo.png';
+                centerLogoImg.className = 'center-logo';
+                centerLogoImg.alt = 'Center Energy Logo';
+                centerLogoImg.onerror = function() { this.style.display='none'; };
+                emptySlot.appendChild(centerLogoImg);
+                gridContainer.appendChild(emptySlot);
+
+                gridPositions.forEach((posClass, index) => {
+                    const cardObj = shuffledDeck[index];
+                    
+                    const cardSlot = document.createElement('div');
+                    cardSlot.className = `card-slot ${posClass}`;
+                    
+                    const cardInner = document.createElement('div');
+                    cardInner.className = 'card-inner';
+                    
+                    const cardBack = document.createElement('div');
+                    cardBack.className = 'card-back';
+                    
+                    const cardFront = document.createElement('div');
+                    cardFront.className = 'card-front';
+                    cardFront.style.backgroundImage = `url('${cardObj.img}')`;
+
+                    cardInner.appendChild(cardBack);
+                    cardInner.appendChild(cardFront);
+                    cardSlot.appendChild(cardInner);
+                    
+                    cardSlot.addEventListener('click', () => {
+                        if(!isFlipping && cardSlot.classList.contains('clickable')) {
+                            openModal(cardObj);
+                        }
+                    });
+
+                    gridContainer.appendChild(cardSlot);
+                });
+            }
+
+            function flipAllCards() {
+                isFlipping = true;
+                btnFlip.classList.add('hidden'); 
+                
+                const allCardInners = document.querySelectorAll('.card-inner');
+                const allCardSlots = document.querySelectorAll('.card-slot');
+                
+                allCardInners.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('is-flipped');
+                        
+                        if(index === allCardInners.length - 1) {
+                            setTimeout(() => {
+                                isFlipping = false;
+                                allCardSlots.forEach(slot => slot.classList.add('clickable'));
+                                btnReset.classList.remove('hidden');
+                            }, 500);
+                        }
+                    }, index * 200);
+                });
+            }
+
+            function openModal(cardObj) {
+                modalTitle.textContent = `${cardObj.color}禪卡`;
+                modalDesc.textContent = cardObj.meaning;
+                modalImgPlaceholder.style.backgroundImage = `url('${cardObj.img}')`;
+                modalImgPlaceholder.style.backgroundSize = 'contain';
+                modalImgPlaceholder.style.backgroundRepeat = 'no-repeat';
+                modalImgPlaceholder.style.backgroundPosition = 'center';
+                
+                modal.classList.add('active');
+            }
+
+            function closeModal() {
+                modal.classList.remove('active');
+            }
+
+            function resetGame() {
+                gridContainer.innerHTML = '';
+                shuffledDeck = [];
+                isFlipping = false;
+                
+                pageBoard.classList.add('hidden');
+                page1.classList.remove('hidden');
+            }
+        }); // 結束 DOMContentLoaded 保護殼
+    </script>
+</body>
+</html>
