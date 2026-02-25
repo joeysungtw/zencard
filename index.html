@@ -59,15 +59,16 @@
             align-items: center;
         }
         .logo-container {
-            width: 150px;
-            height: 150px;
+            /* 【尺寸優化】：從 150px 放大 1.25 倍至 187.5px */
+            width: 187.5px;
+            height: 187.5px;
             margin-bottom: 30px;
         }
         .logo {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            animation: spin 15s linear infinite;
+            animation: spin 12s linear infinite;
             background-color: transparent; 
         }
         @keyframes spin {
@@ -108,10 +109,11 @@
             align-items: center;
         } 
         .center-logo {
-            width: 75%;
-            height: 75%;
+            /* 【尺寸優化】：從 75% 放大 1.25 倍至 93.75% */
+            width: 93.75%;
+            height: 93.75%;
             object-fit: contain;
-            animation: spin 20s linear infinite; 
+            animation: spin 16s linear infinite; 
             opacity: 0.85;
         }
 
@@ -236,7 +238,6 @@
             font-size: 1.05rem;
             line-height: 1.7;
             color: #444;
-            /* 移除 pre-line，讓 HTML 排版自由度更高 */
         }
     </style>
 </head>
@@ -292,7 +293,7 @@
                   meaning: `<b>對應：</b>頂輪<br><b>光明面：</b>悠閒自得<br><b>陰影面：</b>茫然無助、沒主見、沒目標<br><b>行運吉凶：</b>恍神多意外、生命能量虛弱。運勢能量低落「No.3」。` }
             ];
 
-            // 【九宮位涵義資料庫】(依據四安生活禪簡報 p.15~20 建立)
+            // 【九宮位涵義資料庫】
             const palaceData = {
                 'pos-1': { num: '1', relation: '兄弟、朋友、同事、部屬', time: '一月、二月', direction: '東北方', body: '右下肢' },
                 'pos-2': { num: '2', relation: '自己外在的行為模式', time: '三月', direction: '東方', body: '右肺、肝、膽、胰、右手臂、右腎' },
@@ -386,7 +387,6 @@
                     cardInner.appendChild(cardFront);
                     cardSlot.appendChild(cardInner);
                     
-                    // 【重點更新】：將 posClass 傳遞給 Modal，藉此辨識宮位
                     cardSlot.addEventListener('click', () => {
                         if(!isFlipping && cardSlot.classList.contains('clickable')) {
                             openModal(cardObj, posClass);
@@ -419,13 +419,11 @@
                 });
             }
 
-            // 【重點更新】：在 Modal 中整合顏色解釋與宮位說明
             function openModal(cardObj, posClass) {
-                const palace = palaceData[posClass]; // 取得該卡片對應的宮位資料
+                const palace = palaceData[posClass]; 
                 
                 modalTitle.textContent = `${cardObj.color}禪卡`;
                 
-                // 組裝精緻的 HTML 排版
                 const palaceHtml = `
                     <p style="font-size:1.1rem; line-height:1.6; color:#444;">${cardObj.meaning}</p>
                     <hr style="margin: 20px 0; border: 0; border-top: 2px dashed #e0e0e0;">
