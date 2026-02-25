@@ -2,8 +2,16 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>八色禪卡線上抽牌</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Joey自用線上抽牌</title>
+
+    <link rel="icon" type="image/png" href="./images/logo.png">
+    <link rel="apple-touch-icon" href="./images/logo.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Joey自用線上抽牌">
+    <meta name="mobile-web-app-capable" content="yes">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
 
@@ -12,6 +20,15 @@
             margin: 0;
             padding: 0;
             font-family: 'Google Sans', 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
+            /* 防止手機長按文字反白，提升 App 體驗 */
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Modal 內的文字允許反白複製 */
+        .modal-desc {
+            -webkit-user-select: text;
+            user-select: text;
         }
 
         body {
@@ -22,6 +39,8 @@
             align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
+            /* 修正 iOS 滾動回彈背景色問題 */
+            overscroll-behavior-y: none;
         }
 
         .container {
@@ -422,7 +441,6 @@
                 
                 modalTitle.textContent = `${cardObj.color}禪卡`;
                 
-                // 【重點更新】：動態判斷是否為第 7 宮，加上「（解藥）」後綴
                 const palaceSuffix = palace.num === '7' ? '（解藥）' : '';
                 
                 const palaceHtml = `
@@ -463,5 +481,3 @@
     </script>
 </body>
 </html>
-
-
