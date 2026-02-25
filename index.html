@@ -32,14 +32,17 @@
             user-select: text;
         }
 
+        /* 【響應式升級】：鎖定螢幕不允許滾動，自適應動態高度 */
         body {
             background-color: #f7f6f2;
             color: #333;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh; /* 支援現代手機動態視窗高度 */
+            overflow: hidden; /* 隱藏全局滾動條 */
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
             overscroll-behavior-y: none;
             animation: appFadeIn 0.8s ease-out forwards;
         }
@@ -51,22 +54,25 @@
 
         .container {
             width: 100%;
+            height: 100%;
             max-width: 600px;
-            padding: 20px;
-            text-align: center;
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4vmin;
         }
 
         button {
             background-color: #4A4A4A;
             color: #fff;
             border: none;
-            padding: 12px 30px;
-            font-size: 1.1rem;
+            padding: 1.5vh 6vw; /* 動態按鈕大小 */
+            font-size: clamp(1rem, 2vh, 1.15rem);
             border-radius: 30px;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
-            margin-top: 30px;
+            margin: 1.5vh 0;
             letter-spacing: 2px;
         }
         button:hover {
@@ -78,15 +84,20 @@
             display: none !important;
         }
 
-        #page-1 {
+        /* 頁面容器共通設定 */
+        #page-1, #page-board {
+            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
         }
+
+        /* 【響應式升級】：Logo 與文字自動縮放 */
         .logo-container {
-            width: 187.5px;
-            height: 187.5px;
-            margin-bottom: 30px;
+            width: min(45vw, 25vh);
+            height: min(45vw, 25vh);
+            margin-bottom: 4vh;
         }
         .logo {
             width: 100%;
@@ -98,25 +109,23 @@
         @keyframes spin {
             100% { transform: rotate(360deg); }
         }
+        
         .instruction {
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 2.5vh, 1.25rem);
             line-height: 1.6;
-            margin-bottom: 20px;
+            margin-bottom: 4vh;
             color: #555;
-        }
-
-        #page-board {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            text-align: center;
         }
         
+        /* 【響應式升級】：九宮格完美適應螢幕 */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 2vmin;
             width: 100%;
-            max-width: 420px;
+            /* 寬度不超過螢幕的85%，且高度保證不超過螢幕的45%，確保絕不破版 */
+            max-width: min(85vw, 45vh); 
             margin: 0 auto;
         }
 
@@ -133,8 +142,8 @@
             align-items: center;
         } 
         .center-logo {
-            width: 93.75%;
-            height: 93.75%;
+            width: 90%;
+            height: 90%;
             object-fit: contain;
             animation: spin 16s linear infinite; 
             opacity: 0.85;
@@ -158,7 +167,7 @@
             transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
             transform-style: preserve-3d;
             box-shadow: 0 4px 10px rgba(0,0,0,0.12);
-            border-radius: 14px;
+            border-radius: 12px;
         }
         .card-inner.is-flipped {
             transform: rotateY(180deg);
@@ -170,7 +179,7 @@
             height: 100%;
             -webkit-backface-visibility: hidden;
             backface-visibility: hidden;
-            border-radius: 14px; 
+            border-radius: 12px; 
             overflow: hidden;
             background-size: contain;
             background-repeat: no-repeat;
@@ -192,26 +201,28 @@
             transform: rotateY(180deg) scale(1.03);
         }
 
-        /* 熵值簽名專屬樣式 */
+        /* 【視覺動線平衡】：夾在九宮格與按鈕中間的熵值簽名 */
         .entropy-signature {
-            margin-top: 40px;
-            font-size: 0.65rem;
+            margin: 2.5vh 0; /* 上下左右等距呼吸空間 */
+            font-size: clamp(0.6rem, 1.5vh, 0.75rem);
             color: #b0b0b0;
             letter-spacing: 1.5px;
             font-family: 'Courier New', Courier, monospace;
             opacity: 0.6;
             word-break: break-all;
             max-width: 90%;
-            /* 加上淡入效果讓浮現更優雅 */
             transition: opacity 0.5s ease;
+            text-align: center;
         }
 
+        /* Modal 彈出視窗：保持內部可滾動 */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             background: rgba(0, 0, 0, 0.75);
             display: flex;
             justify-content: center;
@@ -235,7 +246,7 @@
             transform: translateY(20px);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: left;
-            max-height: 90vh;
+            max-height: 85vh; /* 限制高度讓視窗內可以滑動 */
             overflow-y: auto;
         }
         .modal-overlay.active .modal-content {
@@ -256,22 +267,22 @@
         }
         .modal-image {
             width: 100%;
-            height: 280px;
+            height: 25vh;
             object-fit: contain;
             border-radius: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 2vh;
             background-color: transparent;
         }
         .modal-title {
-            font-size: 1.6rem;
-            margin-bottom: 12px;
+            font-size: clamp(1.4rem, 3vh, 1.6rem);
+            margin-bottom: 1.5vh;
             color: #222;
             border-bottom: 2px solid #f0f0f0;
             padding-bottom: 8px;
             font-weight: 700;
         }
         .modal-desc {
-            font-size: 1.05rem;
+            font-size: clamp(0.95rem, 2vh, 1.05rem);
             line-height: 1.7;
             color: #444;
         }
@@ -289,13 +300,13 @@
         </div>
 
         <div id="page-board" class="hidden">
-            <div class="grid-container" id="card-grid">
-            </div>
+            <div class="grid-container" id="card-grid"></div>
             
             <button id="btn-flip">翻牌</button>
-            <button id="btn-reset" class="hidden">重新抽牌</button>
             
             <p id="entropy-signature" class="entropy-signature hidden"></p>
+            
+            <button id="btn-reset" class="hidden">重新抽牌</button>
         </div>
     </div>
 
@@ -399,7 +410,6 @@
                 btnFlip.classList.remove('hidden');
                 btnReset.classList.add('hidden');
                 
-                // 【狀態管理】：洗牌時生成宇宙編碼，但確保它是隱藏的
                 entropySignatureEl.textContent = generateEntropySignature();
                 entropySignatureEl.classList.add('hidden');
                 
@@ -461,13 +471,12 @@
                     setTimeout(() => {
                         card.classList.add('is-flipped');
                         
-                        // 【狀態管理】：當最後一張牌翻完（進入第三頁），同時解除隱藏按鈕與簽名
                         if(index === allCardInners.length - 1) {
                             setTimeout(() => {
                                 isFlipping = false;
                                 allCardSlots.forEach(slot => slot.classList.add('clickable'));
-                                btnReset.classList.remove('hidden');
-                                entropySignatureEl.classList.remove('hidden'); // ✨ 熵值簽名優雅揭曉
+                                entropySignatureEl.classList.remove('hidden'); // 先顯示簽名
+                                btnReset.classList.remove('hidden'); // 再顯示按鈕，達成視覺動線
                             }, 500);
                         }
                     }, index * 200);
@@ -512,7 +521,6 @@
                 shuffledDeck = [];
                 isFlipping = false;
                 
-                // 【狀態管理】：回到首頁時，清除隱藏宇宙印記
                 entropySignatureEl.classList.add('hidden');
                 entropySignatureEl.textContent = '';
                 
