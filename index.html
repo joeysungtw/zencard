@@ -59,7 +59,6 @@
             align-items: center;
         }
         .logo-container {
-            /* 【尺寸優化】：從 150px 放大 1.25 倍至 187.5px */
             width: 187.5px;
             height: 187.5px;
             margin-bottom: 30px;
@@ -109,7 +108,6 @@
             align-items: center;
         } 
         .center-logo {
-            /* 【尺寸優化】：從 75% 放大 1.25 倍至 93.75% */
             width: 93.75%;
             height: 93.75%;
             object-fit: contain;
@@ -424,10 +422,13 @@
                 
                 modalTitle.textContent = `${cardObj.color}禪卡`;
                 
+                // 【重點更新】：動態判斷是否為第 7 宮，加上「（解藥）」後綴
+                const palaceSuffix = palace.num === '7' ? '（解藥）' : '';
+                
                 const palaceHtml = `
                     <p style="font-size:1.1rem; line-height:1.6; color:#444;">${cardObj.meaning}</p>
                     <hr style="margin: 20px 0; border: 0; border-top: 2px dashed #e0e0e0;">
-                    <h3 style="color:#222; font-size:1.25rem; margin-bottom:12px; font-weight:700;">📌 所在宮位：第 ${palace.num} 宮</h3>
+                    <h3 style="color:#222; font-size:1.25rem; margin-bottom:12px; font-weight:700;">📌 所在宮位：第 ${palace.num} 宮${palaceSuffix}</h3>
                     <ul style="list-style-type: none; padding-left: 0; color:#555; line-height:1.8; font-size:1.05rem;">
                         <li><b>👥 人際關係：</b>${palace.relation}</li>
                         <li><b>⏳ 時間對應：</b>${palace.time}</li>
