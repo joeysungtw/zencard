@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Joey自用線上抽牌</title>
 
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#f7f6f2">
+    
     <link rel="icon" type="image/png" href="./images/logo.png">
     <link rel="apple-touch-icon" href="./images/logo.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,12 +23,10 @@
             margin: 0;
             padding: 0;
             font-family: 'Google Sans', 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
-            /* 防止手機長按文字反白，提升 App 體驗 */
             -webkit-user-select: none;
             user-select: none;
         }
 
-        /* Modal 內的文字允許反白複製 */
         .modal-desc {
             -webkit-user-select: text;
             user-select: text;
@@ -39,7 +40,6 @@
             align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
-            /* 修正 iOS 滾動回彈背景色問題 */
             overscroll-behavior-y: none;
         }
 
@@ -186,7 +186,6 @@
             transform: rotateY(180deg) scale(1.03);
         }
 
-        /* ================= Modal 彈出視窗 ================= */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -271,7 +270,7 @@
 
         <div id="page-board" class="hidden">
             <div class="grid-container" id="card-grid">
-                </div>
+            </div>
             
             <button id="btn-flip">翻牌</button>
             <button id="btn-reset" class="hidden">再次重新抽牌</button>
@@ -290,7 +289,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // 【色牌涵義資料庫】
             const cardData = [
                 { id: 'red', color: '紅色', img: './images/card-front-red.png',
                   meaning: `<b>對應：</b>海底輪<br><b>光明面：</b>熱情、勤勞、活力<br><b>陰影面：</b>好勝、急躁、衝動<br><b>行運吉凶：</b>充滿行動力、執行力；或有口舌爭執、衝動行事、身忙心亂。` },
@@ -310,7 +308,6 @@
                   meaning: `<b>對應：</b>頂輪<br><b>光明面：</b>悠閒自得<br><b>陰影面：</b>茫然無助、沒主見、沒目標<br><b>行運吉凶：</b>恍神多意外、生命能量虛弱。運勢能量低落「No.3」。` }
             ];
 
-            // 【九宮位涵義資料庫】
             const palaceData = {
                 'pos-1': { num: '1', relation: '兄弟、朋友、同事、部屬', time: '一月、二月', direction: '東北方', body: '右下肢' },
                 'pos-2': { num: '2', relation: '自己外在的行為模式', time: '三月', direction: '東方', body: '右肺、肝、膽、胰、右手臂、右腎' },
@@ -340,7 +337,6 @@
             const modalTitle = document.getElementById('modal-title');
             const modalDesc = document.getElementById('modal-desc');
 
-            // 綁定事件監聽器
             if(btnStart) btnStart.addEventListener('click', startGame);
             if(btnFlip) btnFlip.addEventListener('click', flipAllCards);
             if(btnReset) btnReset.addEventListener('click', resetGame);
