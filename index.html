@@ -236,7 +236,7 @@
             font-size: 1.05rem;
             line-height: 1.7;
             color: #444;
-            white-space: pre-line;
+            /* 移除 pre-line，讓 HTML 排版自由度更高 */
         }
     </style>
 </head>
@@ -256,7 +256,7 @@
                 </div>
             
             <button id="btn-flip">翻牌</button>
-            <button id="btn-reset" class="hidden">再次抽牌</button>
+            <button id="btn-reset" class="hidden">再次重新抽牌</button>
         </div>
     </div>
 
@@ -270,51 +270,39 @@
     </div>
 
     <script>
-        // 【防禦性殼層】：確保 HTML 完全載入後才執行 JS，杜絕按鈕失效問題
         document.addEventListener('DOMContentLoaded', () => {
             
+            // 【色牌涵義資料庫】
             const cardData = [
                 { id: 'red', color: '紅色', img: './images/card-front-red.png',
-                  meaning: `對應海底輪。
-光明面：熱情、勤勞、活力。
-陰影面：好勝、急躁、衝動。
-行運吉凶：充滿行動力、執行力；或有口舌爭執、衝動行事、身忙心亂。` },
+                  meaning: `<b>對應：</b>海底輪<br><b>光明面：</b>熱情、勤勞、活力<br><b>陰影面：</b>好勝、急躁、衝動<br><b>行運吉凶：</b>充滿行動力、執行力；或有口舌爭執、衝動行事、身忙心亂。` },
                 { id: 'orange', color: '橙色', img: './images/card-front-orange.png',
-                  meaning: `對應臍輪。
-光明面：謹慎、準備充分。
-陰影面：悲觀、恐懼、情緒化。
-行運吉凶：糾葛難安、陰祟困擾、瑣事多。運勢能量「低落No.1」。` },
+                  meaning: `<b>對應：</b>臍輪<br><b>光明面：</b>謹慎、準備充分<br><b>陰影面：</b>悲觀、恐懼、情緒化<br><b>行運吉凶：</b>糾葛難安、陰祟困擾、瑣事多。運勢能量「低落No.1」。` },
                 { id: 'yellow', color: '黃色', img: './images/card-front-yellow.png',
-                  meaning: `對應太陽神經叢。
-光明面：聰明、理性、完美。
-陰影面：固執、嚴肅、緊張。
-行運吉凶：快樂、旅行、偏財、轉運。` },
+                  meaning: `<b>對應：</b>太陽神經叢<br><b>光明面：</b>聰明、理性、完美<br><b>陰影面：</b>固執、嚴肅、緊張<br><b>行運吉凶：</b>快樂、旅行、偏財、轉運。` },
                 { id: 'green', color: '綠色', img: './images/card-front-green.png',
-                  meaning: `對應心輪。
-光明面：親和、好奇、溝通。
-陰影面：善變、多話、輕浮。
-行運吉凶：喜慶、事業成功，考試順利、正財。` },
+                  meaning: `<b>對應：</b>心輪<br><b>光明面：</b>親和、好奇、溝通<br><b>陰影面：</b>善變、多話、輕浮<br><b>行運吉凶：</b>喜慶、事業成功，考試順利、正財。` },
                 { id: 'pink', color: '粉紅色', img: './images/card-front-pink.png',
-                  meaning: `對應上心輪。
-光明面：戀愛、重情、樂觀。
-陰影面：濫好人、不知拒絕。
-行運吉凶：愛情順、紅鸞星動、心情美麗、人緣桃花帶來財運。` },
+                  meaning: `<b>對應：</b>上心輪<br><b>光明面：</b>戀愛、重情、樂觀<br><b>陰影面：</b>濫好人、不知拒絕<br><b>行運吉凶：</b>愛情順、紅鸞星動、心情美麗、人緣桃花帶來財運。` },
                 { id: 'blue', color: '藍色', img: './images/card-front-blue.png',
-                  meaning: `對應喉輪。
-光明面：心思細密、文藝氣息。
-陰影面：敏感憂鬱、多愁善感。
-行運吉凶：煩惱不順、濁病氣纏身、犯小人。運勢能量低落「No.2」。` },
+                  meaning: `<b>對應：</b>喉輪<br><b>光明面：</b>心思細密、文藝氣息<br><b>陰影面：</b>敏感憂鬱、多愁善感<br><b>行運吉凶：</b>煩惱不順、濁病氣纏身、犯小人。運勢能量低落「No.2」。` },
                 { id: 'purple', color: '紫色', img: './images/card-front-purple.png',
-                  meaning: `對應眉心輪。
-光明面：正派、覺知力強、理想性。
-陰影面：拘謹、內向、太過心軟。
-行運吉凶：貴人、諸事吉利、靈性。` },
+                  meaning: `<b>對應：</b>眉心輪<br><b>光明面：</b>正派、覺知力強、理想性<br><b>陰影面：</b>拘謹、內向、太過心軟<br><b>行運吉凶：</b>貴人、諸事吉利、靈性。` },
                 { id: 'white', color: '白色', img: './images/card-front-white.png',
-                  meaning: `對應頂輪。
-光明面：悠閒自得。
-陰影面：茫然無助、沒主見、沒目標。
-行運吉凶：恍神多意外、生命能量虛弱。運勢能量低落「No.3」。` }
+                  meaning: `<b>對應：</b>頂輪<br><b>光明面：</b>悠閒自得<br><b>陰影面：</b>茫然無助、沒主見、沒目標<br><b>行運吉凶：</b>恍神多意外、生命能量虛弱。運勢能量低落「No.3」。` }
             ];
+
+            // 【九宮位涵義資料庫】(依據四安生活禪簡報 p.15~20 建立)
+            const palaceData = {
+                'pos-1': { num: '1', relation: '兄弟、朋友、同事、部屬', time: '一月、二月', direction: '東北方', body: '右下肢' },
+                'pos-2': { num: '2', relation: '自己外在的行為模式', time: '三月', direction: '東方', body: '右肺、肝、膽、胰、右手臂、右腎' },
+                'pos-3': { num: '3', relation: '主管、客戶', time: '四月、五月', direction: '東南方', body: '頭右側、太陽穴、右耳、右眼、右淋巴結、三叉神經' },
+                'pos-4': { num: '4', relation: '自己當下的想法、態度', time: '六月', direction: '南方', body: '頭部、鼻子、睡眠、血壓、口腔、牙齒、甲狀腺' },
+                'pos-5': { num: '5', relation: '父母、長輩', time: '七月、八月', direction: '西南方', body: '頭左側、太陽穴、左耳、左眼、左淋巴結、顏面神經' },
+                'pos-6': { num: '6', relation: '伴侶、配偶、自己內在的情緒狀況', time: '九月', direction: '西方', body: '脾胃、十二指腸、心臟左肺、左手臂、左腎' },
+                'pos-7': { num: '7', relation: '子女、寵物、自己的身體健康狀況', time: '十月、十一月', direction: '西北方', body: '左下肢' },
+                'pos-8': { num: '8', relation: '自己當下的行動力和執行力', time: '十二月', direction: '北方', body: '子宮、膀胱、尿道、肛門、小腸、直腸、攝護腺、生殖器官' }
+            };
 
             const gridPositions = ['pos-1', 'pos-2', 'pos-3', 'pos-4', 'pos-5', 'pos-6', 'pos-7', 'pos-8'];
             let shuffledDeck = [];
@@ -398,9 +386,10 @@
                     cardInner.appendChild(cardFront);
                     cardSlot.appendChild(cardInner);
                     
+                    // 【重點更新】：將 posClass 傳遞給 Modal，藉此辨識宮位
                     cardSlot.addEventListener('click', () => {
                         if(!isFlipping && cardSlot.classList.contains('clickable')) {
-                            openModal(cardObj);
+                            openModal(cardObj, posClass);
                         }
                     });
 
@@ -430,9 +419,27 @@
                 });
             }
 
-            function openModal(cardObj) {
+            // 【重點更新】：在 Modal 中整合顏色解釋與宮位說明
+            function openModal(cardObj, posClass) {
+                const palace = palaceData[posClass]; // 取得該卡片對應的宮位資料
+                
                 modalTitle.textContent = `${cardObj.color}禪卡`;
-                modalDesc.textContent = cardObj.meaning;
+                
+                // 組裝精緻的 HTML 排版
+                const palaceHtml = `
+                    <p style="font-size:1.1rem; line-height:1.6; color:#444;">${cardObj.meaning}</p>
+                    <hr style="margin: 20px 0; border: 0; border-top: 2px dashed #e0e0e0;">
+                    <h3 style="color:#222; font-size:1.25rem; margin-bottom:12px; font-weight:700;">📌 所在宮位：第 ${palace.num} 宮</h3>
+                    <ul style="list-style-type: none; padding-left: 0; color:#555; line-height:1.8; font-size:1.05rem;">
+                        <li><b>👥 人際關係：</b>${palace.relation}</li>
+                        <li><b>⏳ 時間對應：</b>${palace.time}</li>
+                        <li><b>🧭 方位對應：</b>${palace.direction}</li>
+                        <li><b>👤 身體部位：</b>${palace.body}</li>
+                    </ul>
+                `;
+                
+                modalDesc.innerHTML = palaceHtml;
+                
                 modalImgPlaceholder.style.backgroundImage = `url('${cardObj.img}')`;
                 modalImgPlaceholder.style.backgroundSize = 'contain';
                 modalImgPlaceholder.style.backgroundRepeat = 'no-repeat';
@@ -453,7 +460,7 @@
                 pageBoard.classList.add('hidden');
                 page1.classList.remove('hidden');
             }
-        }); // 結束 DOMContentLoaded 保護殼
+        }); 
     </script>
 </body>
 </html>
