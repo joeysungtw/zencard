@@ -32,7 +32,6 @@
             user-select: text;
         }
 
-        /* 【轉場優化】：加入全局淡入動畫，讓 App 開啟時如絲綢般平滑 */
         body {
             background-color: #f7f6f2;
             color: #333;
@@ -193,6 +192,20 @@
             transform: rotateY(180deg) scale(1.03);
         }
 
+        /* 熵值簽名專屬樣式 */
+        .entropy-signature {
+            margin-top: 40px;
+            font-size: 0.65rem;
+            color: #b0b0b0;
+            letter-spacing: 1.5px;
+            font-family: 'Courier New', Courier, monospace;
+            opacity: 0.6;
+            word-break: break-all;
+            max-width: 90%;
+            /* 加上淡入效果讓浮現更優雅 */
+            transition: opacity 0.5s ease;
+        }
+
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -281,6 +294,8 @@
             
             <button id="btn-flip">翻牌</button>
             <button id="btn-reset" class="hidden">重新抽牌</button>
+            
+            <p id="entropy-signature" class="entropy-signature hidden"></p>
         </div>
     </div>
 
@@ -338,6 +353,8 @@
             const btnFlip = document.getElementById('btn-flip');
             const btnReset = document.getElementById('btn-reset');
             
+            const entropySignatureEl = document.getElementById('entropy-signature');
+            
             const modal = document.getElementById('modal');
             const btnCloseModal = document.getElementById('btn-close-modal');
             const modalImgPlaceholder = document.getElementById('modal-img-placeholder');
@@ -367,11 +384,24 @@
                 return arr;
             }
 
+            function generateEntropySignature() {
+                const entropyBuffer = new Uint8Array(16); 
+                window.crypto.getRandomValues(entropyBuffer);
+                const entropyHex = Array.from(entropyBuffer)
+                    .map(b => b.toString(16).padStart(2, '0'))
+                    .join('').toUpperCase();
+                return `✦ ENTROPY:${entropyHex} ✦`;
+            }
+
             function startGame() {
                 page1.classList.add('hidden');
                 pageBoard.classList.remove('hidden');
                 btnFlip.classList.remove('hidden');
                 btnReset.classList.add('hidden');
+                
+                // 【狀態管理】：洗牌時生成宇宙編碼，但確保它是隱藏的
+                entropySignatureEl.textContent = generateEntropySignature();
+                entropySignatureEl.classList.add('hidden');
                 
                 shuffledDeck = shuffleArray(cardData);
                 renderGrid();
@@ -431,11 +461,13 @@
                     setTimeout(() => {
                         card.classList.add('is-flipped');
                         
+                        // 【狀態管理】：當最後一張牌翻完（進入第三頁），同時解除隱藏按鈕與簽名
                         if(index === allCardInners.length - 1) {
                             setTimeout(() => {
                                 isFlipping = false;
                                 allCardSlots.forEach(slot => slot.classList.add('clickable'));
                                 btnReset.classList.remove('hidden');
+                                entropySignatureEl.classList.remove('hidden'); // ✨ 熵值簽名優雅揭曉
                             }, 500);
                         }
                     }, index * 200);
@@ -479,6 +511,10 @@
                 gridContainer.innerHTML = '';
                 shuffledDeck = [];
                 isFlipping = false;
+                
+                // 【狀態管理】：回到首頁時，清除隱藏宇宙印記
+                entropySignatureEl.classList.add('hidden');
+                entropySignatureEl.textContent = '';
                 
                 pageBoard.classList.add('hidden');
                 page1.classList.remove('hidden');
