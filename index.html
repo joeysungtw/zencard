@@ -32,6 +32,7 @@
             user-select: text;
         }
 
+        /* 【轉場優化】：加入全局淡入動畫，讓 App 開啟時如絲綢般平滑 */
         body {
             background-color: #f7f6f2;
             color: #333;
@@ -41,6 +42,12 @@
             min-height: 100vh;
             overflow-x: hidden;
             overscroll-behavior-y: none;
+            animation: appFadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes appFadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
         }
 
         .container {
@@ -348,7 +355,6 @@
                 });
             }
 
-            // 【真隨機優化】：引入 Web Crypto API 生成不可預測的環境高熵亂數
             function shuffleArray(array) {
                 const arr = [...array];
                 for (let i = arr.length - 1; i > 0; i--) {
